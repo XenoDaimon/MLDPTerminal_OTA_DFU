@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    android:theme="@android:style/Theme.WithActionBar">
+
+    <!-- Device: Name - xx:xx:xx:xx:xx:xx -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_device"
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/deviceNameAndAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/Black"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- State: Connected/Disconnected -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_state"
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="5dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/connectionState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/not_connected"
+            android:textColor="@color/Black"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- Separator line -->
+
+    <View
+        android:id="@+id/separator"
+        android:layout_width="fill_parent"
+        android:layout_height="0.2dp"
+        android:layout_margin="5dp"
+        android:background="@android:color/darker_gray"
+        android:visibility="visible" />
+
+    <!-- Blue border enclosing Outgoing: label with editable text below and Send button on right -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:background="@drawable/border_blue"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_outgoing"
+                android:textSize="24sp" />
+
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/clearOutgoingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clear" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/outgoingText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@android:drawable/editbox_background_normal"
+            android:hint="@string/text_to_send"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:maxLines="5"
+            android:scrollbars="vertical"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- Red border enclosing Incoming: label with text below and Clear button on right -->
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Switch
+            android:id="@+id/switchOTA"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:switchMinWidth="0dp"
+            android:switchPadding="0dp"
+            android:text="OTA"
+            android:textOff=" "
+            android:textOn=" "
+            android:thumbTextPadding="0dp" />
+
+        <Button
+            android:id="@+id/buttonOTA"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="Switch to OTA and send DFU" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonDFU"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send DFU" />
+
+    <TextView
+        android:id="@+id/progressionPercentageText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="Not started" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="184dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/border_red"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_incoming"
+                android:textSize="24sp" />
+
+            <Space
+                android:layout_width="5dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/clearIncomingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clear" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/incomingText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:background="@android:drawable/editbox_background_normal"
+            android:maxLines="30"
+            android:scrollbars="vertical"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+    </LinearLayout>
+</LinearLayout>

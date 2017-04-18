@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings used for the pop up alert dalogs
+-->
+<resources>
+    <!-- Help dialog -->
+    <string name="help_title">Using MLDP Terminal Application</string>
+    <string name="help_contents">
+        <![CDATA[
+        <p>
+        The RN4020 module must configured to use the MLDP mode to communicate with the MLDP Terminal application.</p>
+        <p>
+        This can be done with the following commands:</p>
+        <p>
+        <b>SF,2</b> to reset the module to original factory settings.<br>
+        <b>SR,36000800</b> to enable and auto enter MLDP mode, auto advertise using undirected advertisements, and turn on UART flow control.<br>
+        <b>SN,Bob</b> to set the name of the module (up to 6 characters).<br>
+        <b>R,1</b> to reboot and save settings.</p>
+        <p>
+        See the <i>RN4020 Bluetooth Low Energy Module Command Reference User\'s Guide</i> on the <a href="http://www.microchip.com/RN4020">Microchip website</a> for more information.</p>
+        <p>
+        Note that the Android device may cache old settings. Flush the old settings by pairing and unpairing (forgetting) the RN4020 in the Bluetooth settings.</p>
+        ]]></string>
+    <string name="help_ok_button">OK</string>
+
+    <!-- About dialog -->
+    <string name="about_title">About MLDP Terminal Application</string>
+    <string name="about_contents">Copyright (C) 2016 Microchip Technology, Inc.\r\n\nVersion 3.2\r\n</string>
+    <string name="about_ok_button">OK</string>
+
+    <!-- Exit dialog -->
+    <string name="exit_title">Exit MLDP Terminal Application</string>
+    <string name="exit_contents">Are you sure you want to exit?\r\n</string>
+    <string name="exit_ok_button">OK</string>
+    <string name="exit_cancel_button">Cancel</string>
+
+    <!-- Attempting auto connect dialog -->
+    <string name="autoconnect_title">Trying to Connect...</string>
+    <string name="autoconnect_contents">Attempting to connect to the Bluetooth device that was previously used.\r\n\nPress Cancel to scan for another device.\r\n</string>
+    <string name="autoconnect_cancel_button">Cancel</string>
+
+    <!-- Unable to connect dialog -->
+    <string name="noconnect_title">Unable to Connect</string>
+    <string name="noconnect_contents">Failed to connect to the Bluetooth device.\r\n\nDo you want to scan for another device?\r\n</string>
+    <string name="noconnect_ok_button">OK</string>
+    <string name="noconnect_cancel_button">Cancel</string>
+
+    <!-- Lost connection dialog -->
+    <string name="lost_title">Lost Connection...</string>
+    <string name="lost_contents">The connection to the Bluetooth device was lost\r\n\nDo you want to scan for another device?\r\n</string>
+    <string name="lost_ok_button">OK</string>
+    <string name="lost_cancel_button">Cancel</string>
+
+</resources>

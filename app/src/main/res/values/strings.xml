@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings used in the application
+-->
+<resources>
+    <string name="app_name">MLDP Terminal</string>
+    <string name="ble_not_supported">BLE is not supported</string>
+    <string name="mldp_not_supported">MLDP is not supported</string>
+    <string name="label_device">Device: </string>
+    <string name="label_state">State: </string>
+    <string name="unknown">Unknown</string>
+    <string name="no_data">No data</string>
+    <string name="label_incoming">Incoming: </string>
+    <string name="label_outgoing">Outgoing: </string>
+    <string name="send">Send</string>
+    <string name="clear">Clear</string>
+    <string name="enabling_bluetooth">Enabling Bluetooth</string>
+    <string name="connecting">Connecting</string>
+    <string name="connected">Connected</string>
+    <string name="disconnecting">Disconnecting</string>
+    <string name="not_connected">Not Connected</string>
+    <string name="scan_for_devices">Scan for Devices</string>
+    <string name="text_to_send">Text to send</string>
+    <string name="no_devices_found">No devices found</string>
+
+    <!-- Menu items for MLDPTermainalLaunchActivity -->
+    <string name="menu_connect">Connect</string>
+    <string name="menu_disconnect">Disconnect</string>
+    <string name="menu_help">Help</string>
+    <string name="menu_about">About</string>
+    <string name="menu_exit">Exit</string>
+
+    <!-- Menu items for MldpBluetoothScanActivity -->
+    <string name="menu_scan">Scan</string>
+
+</resources>
