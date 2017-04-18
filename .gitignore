@@ -3,3 +3,7 @@
 
 # Removing build files
 build/
+
+# Removing temp files
+tmp/
+.*~
