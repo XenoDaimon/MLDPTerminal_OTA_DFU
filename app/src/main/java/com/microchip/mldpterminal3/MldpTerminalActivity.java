@@ -102,6 +102,7 @@ public class MldpTerminalActivity extends Activity {
     private ProgressBar progressBarDFU;
     private TextView textProgressDFU;
     private static boolean isDisconnected;
+    private static boolean hasFailed = false;
 
     private enum State {STARTING, ENABLING, SCANNING, CONNECTING, CONNECTED, DISCONNECTED, DISCONNECTING}; //States of the app.
     State state = State.STARTING;                                                                   //Initial state when app starts
@@ -345,6 +346,10 @@ public class MldpTerminalActivity extends Activity {
                         new sendDFUFile(false).execute();
                     else if (data.contains("CMD\r\n"))
                         buttonSwitchOTA.setEnabled(true);
+
+                    if (data.contains("Upgrade Err")) {
+                        hasFailed = true;
+                    }
                 }
             }
         }
@@ -435,6 +440,7 @@ public class MldpTerminalActivity extends Activity {
                     case DISCONNECTED:
                         textConnectionState.setText(R.string.not_connected);
                         setProgressBarIndeterminateVisibility(false);                               //Hide circular progress bar
+                        isDisconnected = true;
                         break;
                     case CONNECTING:
                         textConnectionState.setText(R.string.connecting);
@@ -448,6 +454,7 @@ public class MldpTerminalActivity extends Activity {
                         switchOTA.setEnabled(true);
                         switchOTA.setChecked(false);
                         isDisconnected = false;
+                        hasFailed = false;
                         break;
                     case DISCONNECTING:
                         textConnectionState.setText(R.string.disconnecting);
@@ -659,6 +666,10 @@ public class MldpTerminalActivity extends Activity {
                         msg = new byte[byteValues.length - (i * 16)];
                         for (int j = 0; j < msg.length; j++)
                             msg[j] = byteValues[j + i * 16];
+                    }
+                    if (hasFailed) {
+                        hasFailed = false;
+                        return false;
                     }
                     if (isDisconnected)
                         return false;

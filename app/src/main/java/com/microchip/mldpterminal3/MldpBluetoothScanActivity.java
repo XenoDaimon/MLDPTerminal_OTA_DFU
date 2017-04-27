@@ -48,119 +48,6 @@ import java.util.ArrayList;
  * Activity for scanning and displaying available Bluetooth LE devices
  */
 public class MldpBluetoothScanActivity extends ListActivity {
-	private final static String TAG = MldpBluetoothScanActivity.class.getSimpleName();              //Activity name for logging messages on the ADB
-
-    public static final String INTENT_EXTRA_SCAN_ADDRESS = "BLE_SCAN_DEVICE_ADDRESS";
-    public static final String INTENT_EXTRA_SCAN_NAME = "BLE_SCAN_DEVICE_NAME";
-    public static final String INTENT_EXTRA_SCAN_AUTO_CONNECT = "BLE_SCAN_AUTO_CONNECT";
-    private static final int REQ_CODE_ENABLE_BT = 2;                                                //Code to identify activity that enables Bluetooth
-
-    private static final long SCAN_TIME = 10000;						                            //Length of time in milliseconds to scan for BLE devices
-    private Handler scanStopHandler;                                                                //Handler to stop the scan after a time delay
-
-    private MldpBluetoothService bleService;
-    private DeviceListAdapter bleDeviceListAdapter;
-    private boolean areScanning;
-    private CheckBox alwaysConnectCheckBox;
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // Activity launched
-    // Start and bind to the MldpBluetoothService
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        //requestWindowFeature(Window.FEATURE_ACTION_BAR);                                            //Request the ActionBar feature - automatic with the theme selected in AndroidManifest.xml
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);                                //Request the circular progress feature
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.scan_list_screen);                                                  //Show the screen
-        ActionBar actionBar = getActionBar();                                                       //Get the ActionBar
-        actionBar.setTitle(R.string.scan_for_devices);                                              //Set the title on the ActionBar
-        actionBar.setDisplayHomeAsUpEnabled(true);					                                //Make home icon clickable with < symbol on the left to go back
-        setProgressBarIndeterminate(true);                                                          //Make the progress bar indeterminate
-        setProgressBarIndeterminateVisibility(true);                                                //Make the progress bar visible
-        alwaysConnectCheckBox = (CheckBox) findViewById(R.id.alwaysConnectCheckBox);                //Get a reference to the checkbox on the screen
-
-        Intent bleServiceIntent = new Intent(this, MldpBluetoothService.class);	                    //Create Intent to bind to the MldpBluetoothService
-        this.bindService(bleServiceIntent, bleServiceConnection, BIND_AUTO_CREATE);	                //Bind to the  service and use bleServiceConnection callbacks for service connect and disconnect
-        scanStopHandler = new Handler();                                                            //Create a handler for a delayed runnable that will stop the scan after a time
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // Activity resumed
-    // Initializes list view adapter
-    @Override
-    protected void onResume() {
-        super.onResume();
-		bleDeviceListAdapter = new DeviceListAdapter(this, R.layout.scan_list_item);                //Create new list adapter to hold list of BLE devices found during scan
-        setListAdapter(bleDeviceListAdapter);						                                //Bind to our new list adapter
-        if(bleService != null) {                                                                    //Service will not have started when activity first starts but this ensures a scan if resuming from pause
-            scanStart();
-        }
-
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(MldpBluetoothService.ACTION_BLE_SCAN_RESULT);
-        registerReceiver (bleServiceReceiver, intentFilter);                                        //Register the receiver to receive the scan results broadcast by the service
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // Activity paused
-    // Stop scan and clear device list
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(bleService != null) {
-            scanStopHandler.removeCallbacks(stopScan);                                              //Stop the scan timeout handler from calling the runnable to stop the scan
-            scanStop();
-        }
-        unregisterReceiver(bleServiceReceiver);
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // Activity stopped
-    // Unregister the BroadcastReceiver
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // Activity is ending
-    // Unbind from the MldpBluetoothService service
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-            unbindService(bleServiceConnection);                                                    //Unbind from the service
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // Options menu is different depending on whether scanning or not
-    // Show Scan option if not scanning
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.scan_activity_menu, menu);
-        if (areScanning) {											                                //Are scanning
-            menu.findItem(R.id.menu_scan).setVisible(false);                                        //so do not show Scan menu option
-        } else {													                                //Are not scanning
-            menu.findItem(R.id.menu_scan).setVisible(true);			                                //so show Scan menu option
-        }
-        return true;
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // Menu item selected
-    // Start scanning for BLE devices
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-	        case R.id.menu_scan:						                                            //Option to Scan chosen
-                scanStart();
-	            break;
-            case android.R.id.home:                                                                 //User pressed the back arrow next to the icon on the ActionBar
-                onBackPressed();                                                                    //Treat it as if the back button was pressed
-                return true;
-        }
-        return true;
-    }
-
     // ----------------------------------------------------------------------------------------------------------------
     // Callback for MldpBluetoothService service connection and disconnection
     private final ServiceConnection bleServiceConnection = new ServiceConnection() {		        //Create new ServiceConnection interface to handle service connection and disconnection
@@ -220,9 +107,9 @@ public class MldpBluetoothScanActivity extends ListActivity {
     private class DeviceListAdapter extends ArrayAdapter<BleDevice> {
 
         private ArrayList<BleDevice> bleDevices;                                                    //An ArrayList to hold the devices in the list
+
         private int layoutResourceId;
         private Context context;
-
         //Constructor for the DeviceListAdapter
         public DeviceListAdapter(Context context, int layoutResourceId) {
             super(context, layoutResourceId);
@@ -277,14 +164,14 @@ public class MldpBluetoothScanActivity extends ListActivity {
             textViewName.setText(device.name);                                                      //Set the text to the address of the device
             return convertView;
         }
-    }
 
+    }
     // ----------------------------------------------------------------------------------------------------------------
     // Class to hold device name and address
     private class BleDevice {
+
         private String address;                                                                     //Instance variables for address and name of a BLE device
         private String name;
-
         //Constructor for a new BleDevice object
         public BleDevice(String a, String n) {
             address = a;
@@ -316,7 +203,6 @@ public class MldpBluetoothScanActivity extends ListActivity {
 
     }
 
-
     // ----------------------------------------------------------------------------------------------------------------
     // Starts a scan
     private void scanStart() {
@@ -335,6 +221,7 @@ public class MldpBluetoothScanActivity extends ListActivity {
             }
         }
     }
+
 
     // ----------------------------------------------------------------------------------------------------------------
     // Runnable used by the scanStopHandler to stop the scan
@@ -370,5 +257,118 @@ public class MldpBluetoothScanActivity extends ListActivity {
             return;
         }
         super.onActivityResult(requestCode, resultCode, intent);		                            //Pass the activity result up to the parent method
+    }
+
+    // Start scanning for BLE devices
+    private final static String TAG = MldpBluetoothScanActivity.class.getSimpleName();              //Activity name for logging messages on the ADB
+
+    public static final String INTENT_EXTRA_SCAN_ADDRESS = "BLE_SCAN_DEVICE_ADDRESS";
+    public static final String INTENT_EXTRA_SCAN_NAME = "BLE_SCAN_DEVICE_NAME";
+    public static final String INTENT_EXTRA_SCAN_AUTO_CONNECT = "BLE_SCAN_AUTO_CONNECT";
+    private static final int REQ_CODE_ENABLE_BT = 2;                                                //Code to identify activity that enables Bluetooth
+
+    private static final long SCAN_TIME = 10000;						                            //Length of time in milliseconds to scan for BLE devices
+    private Handler scanStopHandler;                                                                //Handler to stop the scan after a time delay
+
+    private MldpBluetoothService bleService;
+    private DeviceListAdapter bleDeviceListAdapter;
+    private boolean areScanning;
+    private CheckBox alwaysConnectCheckBox;
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // Activity launched
+    // Start and bind to the MldpBluetoothService
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        //requestWindowFeature(Window.FEATURE_ACTION_BAR);                                            //Request the ActionBar feature - automatic with the theme selected in AndroidManifest.xml
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);                                //Request the circular progress feature
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.scan_list_screen);                                                  //Show the screen
+        ActionBar actionBar = getActionBar();                                                       //Get the ActionBar
+        actionBar.setTitle(R.string.scan_for_devices);                                              //Set the title on the ActionBar
+        actionBar.setDisplayHomeAsUpEnabled(true);					                                //Make home icon clickable with < symbol on the left to go back
+        setProgressBarIndeterminate(true);                                                          //Make the progress bar indeterminate
+        setProgressBarIndeterminateVisibility(true);                                                //Make the progress bar visible
+        alwaysConnectCheckBox = (CheckBox) findViewById(R.id.alwaysConnectCheckBox);                //Get a reference to the checkbox on the screen
+
+        Intent bleServiceIntent = new Intent(this, MldpBluetoothService.class);	                    //Create Intent to bind to the MldpBluetoothService
+        this.bindService(bleServiceIntent, bleServiceConnection, BIND_AUTO_CREATE);	                //Bind to the  service and use bleServiceConnection callbacks for service connect and disconnect
+        scanStopHandler = new Handler();                                                            //Create a handler for a delayed runnable that will stop the scan after a time
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // Activity resumed
+    // Initializes list view adapter
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bleDeviceListAdapter = new DeviceListAdapter(this, R.layout.scan_list_item);                //Create new list adapter to hold list of BLE devices found during scan
+        setListAdapter(bleDeviceListAdapter);						                                //Bind to our new list adapter
+        if(bleService != null) {                                                                    //Service will not have started when activity first starts but this ensures a scan if resuming from pause
+            scanStart();
+        }
+
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(MldpBluetoothService.ACTION_BLE_SCAN_RESULT);
+        registerReceiver (bleServiceReceiver, intentFilter);                                        //Register the receiver to receive the scan results broadcast by the service
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // Activity paused
+    // Stop scan and clear device list
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(bleService != null) {
+            scanStopHandler.removeCallbacks(stopScan);                                              //Stop the scan timeout handler from calling the runnable to stop the scan
+            scanStop();
+        }
+        unregisterReceiver(bleServiceReceiver);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // Activity stopped
+    // Unregister the BroadcastReceiver
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // Activity is ending
+    // Unbind from the MldpBluetoothService service
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unbindService(bleServiceConnection);                                                    //Unbind from the service
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // Options menu is different depending on whether scanning or not
+    // Show Scan option if not scanning
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.scan_activity_menu, menu);
+        if (areScanning) {											                                //Are scanning
+            menu.findItem(R.id.menu_scan).setVisible(false);                                        //so do not show Scan menu option
+        } else {													                                //Are not scanning
+            menu.findItem(R.id.menu_scan).setVisible(true);			                                //so show Scan menu option
+        }
+        return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // Menu item selected
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_scan:						                                            //Option to Scan chosen
+                scanStart();
+                break;
+            case android.R.id.home:                                                                 //User pressed the back arrow next to the icon on the ActionBar
+                onBackPressed();                                                                    //Treat it as if the back button was pressed
+                return true;
+        }
+        return true;
     }
 }
