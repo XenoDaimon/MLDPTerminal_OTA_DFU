@@ -268,7 +268,7 @@ public class MldpBluetoothService extends Service {
                                     Log.d(TAG, "Found MLDP service and characteristics");
                                 }
 
-                                if (uuid.equals(UUID_MLDP_CONTROL_PRIVATE_CHAR)) {
+                                if (uuid.equals(UUID_MLDP_CONTROL_PRIVATE_CHAR)) {                  //See if it is the MLDP control private characteristic UUID
                                     mldpControlCharacteristic = gattCharacteristic;
                                     final int characteristicProperties = gattCharacteristic.getProperties(); //Get the properties of the characteristic
                                     if ((characteristicProperties & (BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) > 0) { //See if the characteristic has the Write (unacknowledged) property
@@ -489,7 +489,7 @@ public class MldpBluetoothService extends Service {
     }
 
     // ----------------------------------------------------------------------------------------------------------------
-    // Write to the MLDP data characteristic
+    // NOT WORKING: Write to the device name characteristic
     public void writeDeviceName(byte[] byteValues) {                                                          //Write string (may need to add code to limit write to 20 bytes)
         try {
             BluetoothGattCharacteristic writeNameCharacteristic;

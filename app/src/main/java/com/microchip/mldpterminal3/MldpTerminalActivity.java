@@ -337,17 +337,18 @@ public class MldpTerminalActivity extends Activity {
                     textIncoming.append(data);
                     Log.w(TAG, data);
 
+                    // Disable button switch OTA and accept move switch OTA to true
                     if (data.contains("OTA\r\n")) {
                         buttonSwitchOTA.setEnabled(false);
                         switchOTA.setChecked(true);
                     }
 
-                    if (data.contains("OTA\r\n") && otaCheck == 1)
+                    if (data.contains("OTA\r\n") && otaCheck == 1)                                  // If OTA button has been pressed and OTA has been received, send the DFU file
                         new sendDFUFile(false).execute();
-                    else if (data.contains("CMD\r\n"))
+                    else if (data.contains("CMD\r\n"))                                              // If we received CMD, enable the button switch to OTA and send DFU
                         buttonSwitchOTA.setEnabled(true);
 
-                    if (data.contains("Upgrade Err")) {
+                    if (data.contains("Upgrade Err")) {                                             // Stop the data transfer if DFU failed
                         hasFailed = true;
                     }
                 }
@@ -529,16 +530,15 @@ public class MldpTerminalActivity extends Activity {
         }
     };
 
+    /* Listener for the Send OTA DFU button (will send a DFU file using MLDP then switch OTA control and send the DFU again) */
     private final Button.OnClickListener mSwitchOTAButtonListener = new Button.OnClickListener() {
         public void onClick(View view) {
             new sendDFUFile(true).execute();
-            /*
-
-            */
             buttonSwitchOTA.setEnabled(false);
         }
     };
 
+    /* Listener for the OTA switch (sends 2 or 0 to the MLDP control characteristic) */
     private final CompoundButton.OnCheckedChangeListener mSwitchOTAListener = (new CompoundButton.OnCheckedChangeListener() {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if (isChecked) {
@@ -564,14 +564,17 @@ public class MldpTerminalActivity extends Activity {
 
     };
 
+    /* Class used to send the DFU file and update a progress bar in the UIThread */
     private class sendDFUFile extends AsyncTask<String, Integer, Boolean> {
         protected boolean isOTA = false;
 
+        /* Check if this is an OTA (need to send 2 files) */
         public sendDFUFile(boolean isOTA) {
             super();
             this.isOTA = isOTA;
         }
 
+        /* Update the progress bar based on the DFU file size */
         @Override
         protected void onProgressUpdate(Integer... values) {
             int progress = ((Integer[])values)[0];
@@ -582,6 +585,7 @@ public class MldpTerminalActivity extends Activity {
             super.onProgressUpdate(values);
         }
 
+        /* Disable buttons, texts and switch to avoid misuse */
         @Override
         protected void onPreExecute() {
             switchOTA.setEnabled(false);
@@ -591,6 +595,7 @@ public class MldpTerminalActivity extends Activity {
             buttonSendDFU.setEnabled(false);
         }
 
+        /* Enable back the buttons, texts and switch */
         @Override
         protected void onPostExecute(Boolean result) {
             textOutgoing.setEnabled(true);
@@ -605,11 +610,12 @@ public class MldpTerminalActivity extends Activity {
                 switchOTA.setEnabled(true);
         }
 
+        /* Prepare and send the DFU bin file */
         @Override
         protected Boolean doInBackground(String... strings) {
                 try {
                     List<Byte> DFUList = new ArrayList<Byte>();
-                    DataInputStream dis = new DataInputStream(new BufferedInputStream(getAssets().open("RN4020BEC_133_112415_DFU.bin")));
+                    DataInputStream dis = new DataInputStream(new BufferedInputStream(getAssets().open("RN4020BEC_133_112415_DFU.bin")));   // Get the data stream of the bin file from assets
                     while (true) {
                         try {
                             Byte endian = dis.readByte();
@@ -620,18 +626,18 @@ public class MldpTerminalActivity extends Activity {
                         }
                     }
                     dis.close();
-                    Byte[] DFUarr = DFUList.toArray(new Byte[DFUList.size()]);
-                    printHexValues(DFUarr);
-//          Log.d(TAG, DFUList.toString());
+                    Byte[] DFUarr = DFUList.toArray(new Byte[DFUList.size()]);                      // Create Byte array from the file data
+                    printHexValues(DFUarr);                                                         // Used for debug (print hex values of DFUarr
+                    //Log.d(TAG, DFUList.toString());
                     Log.d(TAG, "Byte list size: " + DFUList.size() + " |  Byte array length: " + DFUarr.length);
 
-                    byte[] byteValues = toPrimitives(DFUarr);
+                    byte[] byteValues = toPrimitives(DFUarr);                                       // Switch type from Byte to byte
                     boolean isComplete = false;
-                    if (!createMLDPByteArray(byteValues, isComplete)) {
+                    if (!createMLDPByteArray(byteValues, isComplete)) {                             // Send the DFU byte arrays to the RN4020
                         return false;
                     }
                     if (isOTA) {
-                        sendOTASignal();
+                        sendOTASignal();                                                            // If the class has been call for OTA, send 2 to the MLDP Control characteristic
                         Log.d(TAG, "OTA signal sent.");
                     }
                 } catch (IOException e) {
@@ -643,40 +649,45 @@ public class MldpTerminalActivity extends Activity {
             return true;
         }
 
+        /* Send the OTA signal to the RN4020 (MLDP Control 2) */
         protected void sendOTASignal() {
             byte[] OTAMode = new byte[1];
             OTAMode[0] = 2;
             bleService.writeControlMLDP(OTAMode);
         }
 
+        /* Cut the byte array of the DFU file in byte[16] in order to send it to the RN4020 (max data size in MLDP_data is 20) */
         protected Boolean createMLDPByteArray(byte[] byteValues, boolean isComplete) {
             try {
                 double mem = 0;
                 double per = 0;
-                for (int i = 0; i * 16 < byteValues.length; ++i) {
+                for (int i = 0; i * 16 < byteValues.length; ++i) {                                  // Run this until we run out of bytes
                     byte[] msg = new byte[16];
-                    for (int j = 0; j < 16; ++j) {
+                    for (int j = 0; j < 16; ++j) {                                                  // Create the byte[16] and fill it with
                         if (j + i * 16 >= byteValues.length) {
-                            isComplete = true;
+                            isComplete = true;                                                      // Switch is complete if we have less than 16 bytes to send before the end of the array
                             break;
                         }
                         msg[j] = byteValues[j + i * 16];
                     }
-                    if (isComplete) {
+                    if (isComplete) {                                                               // Less than 16 bytes until the end of the array, create an array of length < 16 to avoid garbage
                         msg = new byte[byteValues.length - (i * 16)];
                         for (int j = 0; j < msg.length; j++)
                             msg[j] = byteValues[j + i * 16];
                     }
-                    if (hasFailed) {
+                    if (hasFailed) {                                                                // hasFailed is switch to true if we receive "Upgrade Err" in order to stop sending data
                         hasFailed = false;
                         return false;
                     }
-                    if (isDisconnected)
+                    if (isDisconnected)                                                             // isDisconnected is switch to true if we lost connection or disconnect from the device. Stop sending data
                         return false;
-                    Thread.sleep(18);
+
+                    Thread.sleep(18);                                                               // During tests we used 18ms of sleep between each packet. Less results in packet loss. 18 seems stable.
+                                                                                                    // More is fine too but can take a long time to finish: (48kB / 16) * nbr of ms time .. (ex: 18ms -> ~54s)
                     bleService.writeMLDP(msg);                                                               //Write the DFU bin to the ble device
-                    per = ((i / (byteValues.length / 16.0)) * 100.0);
-                    if (per - mem > 0.05) {
+
+                    per = ((i / (byteValues.length / 16.0)) * 100.0);                               // Percentage calculation for update
+                    if (per - mem > 0.05) {                                                         // Update every 0.05% or more from last update
                         mem = per;
                         publishProgress(i * 16, byteValues.length);
                         Log.d(TAG, "Upload in progress: " + String.format("%.2f", per) + "%");
@@ -690,6 +701,7 @@ public class MldpTerminalActivity extends Activity {
         }
    }
 
+   /* Convert Byte array to byte array */
     byte[] toPrimitives(Byte[] oBytes)
     {
         byte[] bytes = new byte[oBytes.length];
@@ -700,6 +712,7 @@ public class MldpTerminalActivity extends Activity {
         return bytes;
     }
 
+    /* Print hex values from a Byte array */
     private final void printHexValues(Byte[] bytes) {
         char [] hexArray = "0123456789abcdef".toCharArray();
         char[] hexChars = new char[bytes.length * 2];
@@ -710,65 +723,6 @@ public class MldpTerminalActivity extends Activity {
         }
         Log.d(TAG, new String(hexChars));
     }
-
-    /*
-    // Open and send DFU file
-    private final boolean sendDFUFileMLDP(String filename) {
-        try {
-            List<Byte> DFUList = new ArrayList<Byte>();
-            DataInputStream dis = new DataInputStream(new BufferedInputStream(getAssets().open(filename)));
-            while (true) {
-                try {
-                    Byte endian = dis.readByte();
-                    DFUList.add(endian);
-                    DFUList.add(dis.readByte());
-                } catch (EOFException e) {
-                    break;
-                }
-            }
-            Byte[] DFUarr = DFUList.toArray(new Byte[DFUList.size()]);
-            printHexValues(DFUarr);
-//          Log.d(TAG, DFUList.toString());
-            Log.d(TAG, "Byte list size: " + DFUList.size() + " |  Byte array length: " + DFUarr.length);
-
-            byte[] byteValues = toPrimitives(DFUarr);
-            progressBarDFU.setMax(byteValues.length);
-            try {
-                boolean isComplete = false;
-                for (int i = 0; i * 16 < byteValues.length; ++i) {
-                    byte[] msg = new byte[16];
-                    for (int j = 0; j < 16; ++j) {
-                        if (j + i * 16 >= byteValues.length) {
-                            isComplete = true;
-                            break;
-                        }
-                        msg[j] = byteValues[j + i * 16];
-                    }
-                    if (isComplete) {
-                        msg = new byte[byteValues.length - (i * 16)];
-                        for (int j = 0; j < msg.length; j++)
-                            msg[j] = byteValues[j + i * 16];
-                    }
-                    if (i % 100 == 0)
-                        Log.d(TAG, "Upload in progress: " + String.format("%.2f", ((i / (byteValues.length / 16.0)) * 100.0)) + "%");
-                    Thread.sleep(18);
-                    bleService.writeMLDP(msg);                                                               //Write the DFU bin to the ble device
-                    progressBarDFU.setProgress(i * 16);
-                    progressBarDFU.setMax(byteValues.length);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            dis.close();
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to open DFU file.");
-            Log.e(TAG, e.getMessage());
-            return false;
-        }
-        return true;
-    }
-    */
 
     // ----------------------------------------------------------------------------------------------------------------
     // Callback for Activities that return a result
