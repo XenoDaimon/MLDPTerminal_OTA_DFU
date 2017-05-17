@@ -126,21 +126,27 @@
 
         <Switch
             android:id="@+id/switchOTA"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="75px"
             android:switchMinWidth="0dp"
             android:switchPadding="0dp"
             android:text="OTA"
+            android:textColor="@color/Black"
             android:textOff=" "
             android:textOn=" "
-            android:thumbTextPadding="0dp" />
+            android:thumb="@android:drawable/presence_online"
+            android:thumbTextPadding="0dp"
+            android:track="@android:drawable/button_onoff_indicator_off"
+            android:visibility="visible" />
 
         <Button
             android:id="@+id/buttonOTA"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
             android:maxLines="1"
-            android:text="Switch to OTA and send DFU" />
+            android:text="Switch to OTA and send DFU"
+            android:visibility="gone" />
 
     </LinearLayout>
 
